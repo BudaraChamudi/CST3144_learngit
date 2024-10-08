@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Afterschool Class App</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    .class-item { border: 1px solid #ddd; padding: 10px; margin: 10px 0; }
+    .class-item img { max-width: 100px; display: block; margin-bottom: 10px; }
+    .cart { margin-top: 20px; }
+    button { margin: 5px 0; padding: 5px 10px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>Afterschool Classes</h1>
+
+    <!-- Sorting Options -->
+    <label for="sortBy">Sort by: </label>
+    <select v-model="sortOption">
+      <option value="subject">Subject</option>
+      <option value="location">Location</option>
+      <option value="price">Price</option>
+      <option value="availability">Availability</option>
+    </select>
+
+    <button @click="toggleSortOrder">{{ sortOrder === 'asc' ? 'Ascending' : 'Descending' }}</button>
+
+    <!-- Display Classes -->
+    <div class="class-item" v-for="classItem in sortedClasses" :key="classItem.subject">
+      <h3>{{ classItem.subject }}</h3>
+      <!-- Display Image -->
+      <img :src="classItem.image" :alt="classItem.subject">
+      <p>Location: {{ classItem.location }}</p>
+      <p>Price: ${{ classItem.price }}</p>
+      <p v-if="classItem.availability">Available</p>
+      <p v-else>Unavailable</p>
+      <button @click="addToCart(classItem)">Add to Cart</button>
+    </div>
+
+    <!-- View Cart -->
+    <button @click="viewCart">View Cart</button>
+
+    <!-- Cart Items -->
+    <div class="cart" v-if="cart.length > 0">
+      <h2>Your Cart</h2>
+      <ul>
+        <li v-for="item in cart">{{ item.subject }} - ${{ item.price }}</li>
+      </ul>
+    </div>
+
+    <!-- No items in Cart -->
+    <div v-else>
+      <p>No items in cart</p>
+    </div>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        sortOption: 'subject',  // Default sort option
+        sortOrder: 'asc',       // Sort order: 'asc' or 'desc'
+        cart: [],               // Cart items
+        classes: [
+          { subject: 'Maths', location: 'Room 1', price: 50, availability: true, image: 'assets/math.jpg' },
+          { subject: 'English', location: 'Room 2', price: 40, availability: true, image: 'english.jpg' },
+          { subject: 'Music', location: 'Room 3', price: 60, availability: false, image: 'music.jpg' },
+          { subject: 'Science', location: 'Room 1', price: 55, availability: true, image: 'science.jpg' },
+          { subject: 'History', location: 'Room 4', price: 45, availability: false, image: 'history.jpg' }
+        ]
+      },
+      computed: {
+        sortedClasses() {
+          return this.classes.slice().sort((a, b) => {
+            let modifier = this.sortOrder === 'asc' ? 1 : -1;
+            if (this.sortOption === 'price') {
+              return (a.price - b.price) * modifier;
+            } else if (this.sortOption === 'availability') {
+              return (a.availability === b.availability) ? 0 : (a.availability ? -1 : 1) * modifier;
+            } else {
+              return (a[this.sortOption] > b[this.sortOption] ? 1 : -1) * modifier;
+            }
+          });
+        }
+      },
+      methods: {
+        addToCart(classItem) {
+          this.cart.push(classItem);
+        },
+        viewCart() {
+          alert(`You have ${this.cart.length} item(s) in your cart`);
+        },
+        toggleSortOrder() {
+          this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+        }
+      }
+    });
+  </script>
+</body>
+</html>
